@@ -35,6 +35,8 @@ app.use((req, res, next) => {
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
 
+
+// for any other requests it comes here and show error message 
 app.use((req, res, next) => {
   const error = new Error("Not found");
   error.status = 404;
