@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 
 const Product = require("../models/product");
-
+// find all the products :  we can give some conditions also
 router.get("/", (req, res, next) => {
   Product.find()
     .exec()
@@ -68,6 +68,8 @@ router.get("/:productId", (req, res, next) => {
     });
 });
 
+
+// create new object and loop through all the props in body and create new obj 
 router.patch("/:productId", (req, res, next) => {
   const id = req.params.productId;
   const updateOps = {};
