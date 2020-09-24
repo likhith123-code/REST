@@ -1,22 +1,53 @@
-const express=require('express');
-const mongoose=require('mongoose');
+const express = require("express");
+const app = express();
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
-const app=express()
-const bodyParser = require('body-parser');
+const productRoutes = require("./api/routes/products");
+const orderRoutes = require("./api/routes/orders");
 
+mongoose.connect(
+  "mongodb+srv://Likhith1520:Likhith1520@rest-api.miiel.mongodb.net/Products?retryWrites=true&w=majority",
+  {
+    useMongoClient: true
+  }
+);
+
+app.use(morgan("dev"));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const PostRouter = require('./routes/posts');
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+    return res.status(200).json({});
+  }
+  next();
+});
 
+// Routes which should handle requests
+app.use("/products", productRoutes);
+app.use("/orders", orderRoutes);
 
-// by default posts : then we can add additonal routing to it in posts.js
-app.use('/posts',PostRouter);
+app.use((req, res, next) => {
+  const error = new Error("Not found");
+  error.status = 404;
+  next(error);
+});
 
-app.get('/',(req,res)=>{
-    res.send("Hello welcome to home page")
-})
+app.use((error, req, res, next) => {
+  res.status(error.status || 500);
+  res.json({
+    error: {
+      message: error.message
+    }
+  });
+});
 
-mongoose.connect("https://localhost:27017/",{ useNewUrlParser: true },()=>{
-    console.log("DataBase Connected Succesfully");
-})
-app.listen(3000);
+module.exports = app;
